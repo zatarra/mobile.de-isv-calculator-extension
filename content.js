@@ -1,25 +1,4 @@
-const rawEmissions = document.getElementById("rbt-envkv.emission-v").innerText;
-const rawRegistration = document.getElementById("rbt-firstRegistration-v").innerText;
-const rawCC = document.getElementById("rbt-cubicCapacity-v").innerText;
-const rawFuel = document.getElementById("rbt-fuel-v").innerText;
-const pricePlaceholder = document.getElementById("rbt-pt-v");
-const rawPrice = document.getElementById("rbt-pt-v").innerText;
- 
-const regexEmissions = /[0-9]+/g;
-const regexRegistration = /[0-9]{2}\/[0-9]{4}/g;
-const regexRawCC = /[0-9]+\.?[0-9+]/g;
-const regexFuel = /[a-zA-Z\-]/g
-const regexPrice = /[0-9,.]+/g
-
-/* 
-Types of Fuel
-
-Benzin, Petrol
-Elektro, Electric
-Hybrid (petrol/electric), Hybrid (Benzin/Elektro)
-Hybrid (diesel / electric), Hybrid (Diesel / Elektro)
-Diesel
-*/
+const DEBUG=false;
 
 function calculate_cc_tax(engineSize) {
   if(engineSize <= 1000)
@@ -29,6 +8,7 @@ function calculate_cc_tax(engineSize) {
   else
     return (engineSize * 5.08) - 5616.80;
 }
+
 
 function calculate_co2_tax_diesel(emissions, measurement_type){
   if(measurement_type == "NEDC"){
@@ -184,6 +164,48 @@ function computeTax(value, taxCut){
   return value*(1+taxCut);
 }
 
+function calculate_motorcycle_import(cc){
+  if (cc < 120)
+    return 0;
+  else if (cc <= 250)
+    return 66.90;
+  else if (cc <= 350)
+    return 83.08;
+  else if (cc <= 500)
+    return 111.13;
+  else if (cc <= 750)
+    return 167.24;
+  else
+    return 222.27;
+}
+
+if ( document.getElementById("rbt-envkv.emission-l") ){
+console.log("ENTERING CAR MODE");
+const rawEmissions = document.getElementById("rbt-envkv.emission-v").innerText;
+const rawRegistration = document.getElementById("rbt-firstRegistration-v").innerText;
+const rawCC = document.getElementById("rbt-cubicCapacity-v").innerText;
+const rawFuel = document.getElementById("rbt-fuel-v").innerText;
+const pricePlaceholder = document.getElementById("rbt-pt-v");
+const rawPrice = document.getElementById("rbt-pt-v").innerText;
+ 
+const regexEmissions = /[0-9]+/g;
+const regexRegistration = /[0-9]{2}\/[0-9]{4}/g;
+const regexRawCC = /[0-9]+\.?[0-9+]/g;
+const regexFuel = /[a-zA-Z\-]/g
+const regexPrice = /[0-9,.]+/g
+
+/* 
+Types of Fuel
+
+Benzin, Petrol
+Elektro, Electric
+Hybrid (petrol/electric), Hybrid (Benzin/Elektro)
+Hybrid (diesel / electric), Hybrid (Diesel / Elektro)
+Diesel
+*/
+
+
+
 function calculate_cost(cc, registrationDate, emissions, fuelType){
   //console.log("Calculating ISV for a " , fuelType , " car with " + cc.toString() + "cc registered on " + registrationDate.toString() + " emitting " + emissions.toString(), "g/km");
   
@@ -246,4 +268,17 @@ if (["Petrol", "Benzin", "Diesel"].includes(fuel)) {
   const total_cost = total_tax + price; 
   const priceTag = document.getElementById("rbt-pt-v").getElementsByTagName("span")[0];
   priceTag.innerHTML = priceTag.innerHTML + "<br/>" + result;
+}
+} else if (document.getElementById("rbt-drivingMode-l")){
+    console.log("ENTERING MOTORCYCLE MODE");
+    const motorcycleCC = document.getElementById("rbt-cubicCapacity-v").innerText;
+    const regexMotorcycleCC = /[0-9]+\.?[0-9+]/g;
+    const cc = motorcycleCC.match(regexMotorcycleCC).join("").split('.').join("").trim();
+    const rawPrice = document.getElementById("rbt-pt-v").innerText;
+    const regexPrice = /[0-9,.]+/g
+    const price = parseFloat(rawPrice.match(regexPrice).join("").trim().replace(",", "").replace(".", "").trim());
+
+    const motorcycle_cost = calculate_motorcycle_import(cc);
+    const priceTag = document.getElementById("rbt-pt-v").getElementsByTagName("span")[0];
+    priceTag.innerHTML = priceTag.innerHTML + "<br/><font color='red'><strong>ISV: </strong>€" + Number(motorcycle_cost) + "<br/><strong>Total: </strong>€" + (Number(price) + Number(motorcycle_cost)).toString() + "</font>";
 }

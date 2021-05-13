@@ -7,9 +7,12 @@
   "content_scripts": [
     {
       "matches": [
-        "https://suchen.mobile.de/fahrzeuge/details.html*"
+        "https://suchen.mobile.de/fahrzeuge/details.html*",
+	"https://suchen.mobile.de/auto-inserat*",
+	"https://suchen.mobile.de/*"
       ],
-      "js": ["content.js"]
+      "js": ["content.js"],
+      "run_at": "document_end"
     }
   ]
 }
