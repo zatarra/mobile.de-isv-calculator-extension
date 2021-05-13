@@ -219,7 +219,7 @@ function calculate_cost(cc, registrationDate, emissions, fuelType){
   if (registrationDateObj.getFullYear() >= 2020)
     return {model: "wltp", value: total_wltp.toFixed(2)};
   else
-    return {nedc: total_nedc.toFixed(2), wltp: total_wltp};
+    return {nedc: total_nedc.toFixed(2), wltp: total_wltp.toFixed(2)};
 }
 
 const emissions = rawEmissions.match(regexEmissions)[0].trim();
@@ -235,13 +235,13 @@ if (["Petrol", "Benzin", "Diesel"].includes(fuel)) {
   const total_tax = calculate_cost(cc, "01/" + registration, emissions, fuel);
   if ("model" in total_tax){
     console.log(total_tax.value.toString());
-    const total_cost = parseFloat(total_tax.value).toFixed(2) + parseFloat(price).toFixed(2);
-    result = "<font color='red'><strong>ISV: </strong>€" + total_tax.value.toFixed(2).toString() + " (" + total_tax.model.toFixed(2).toString() + ")<br/>";
-    result += "<font color='red'><strong>Total</strong></font>: €" + total_cost.toFixed(2).toString();
+    const total_cost = Number(total_tax.value) + Number(price.toFixed(2));
+    result = "<font color='red'><strong>ISV: </strong>€" + total_tax.value.toString() + " (" + total_tax.model.toString() + ")<br/>";
+    result += "<font color='red'><strong>Total</strong></font>: €" + total_cost.toString() + "potato";
   } else {
-    result = "<font color='red'><strong>ISV: </strong>€" + parseFloat(total_tax.nedc).toFixed(2) + " (NEDC)<br/>";
+    result = "<font color='red'><strong>ISV: </strong>€" + parseFloat(total_tax.nedc) + " (NEDC)<br/>";
     result += "<font color='red'><strong>Total</strong></font>: €" + (parseFloat(total_tax.nedc) + parseFloat(price)).toFixed(2).toString() + " (NEDC)<br/>";
-    result += "<font color='red'><strong>ISV: </strong>€" + parseFloat(total_tax.wltp).toFixed(2) + " (WLTP)<br/>";
+    result += "<font color='red'><strong>ISV: </strong>€" + parseFloat(total_tax.wltp) + " (WLTP)<br/>";
     result += "<font color='red'><strong>Total</strong></font>: €" + (parseFloat(total_tax.wltp) + parseFloat(price)).toFixed(2).toString() + " (WLTP)";
   }
     
