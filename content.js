@@ -185,7 +185,7 @@ function computeTax(value, taxCut){
 }
 
 function calculate_cost(cc, registrationDate, emissions, fuelType){
-  console.log("Calculating ISV for a " , fuelType , " car with " + cc.toString() + "cc registered on " + registrationDate.toString() + " emitting " + emissions.toString(), "g/km");
+  //console.log("Calculating ISV for a " , fuelType , " car with " + cc.toString() + "cc registered on " + registrationDate.toString() + " emitting " + emissions.toString(), "g/km");
   
   const registrationDateObj = new Date(registrationDate);
   const cc_tax = calculate_cc_tax(parseInt(cc));
@@ -197,22 +197,21 @@ function calculate_cost(cc, registrationDate, emissions, fuelType){
   const cc_total = cc_tax - ( cc_cut * cc_tax );
   const nedc_total = nedc_tax - Math.abs( co2_cut * nedc_tax);
   const wltp_total = wltp_tax - Math.abs( co2_cut * wltp_tax);
-
-  console.log("CC Tax " , cc_tax.toString());
-  console.log("CC c/ desconto " , cc_total.toString());
-  console.log("NEDC Total ", nedc_tax.toString());
-  console.log("NEDC c/ desconto ", nedc_total.toString());
-  console.log("WLTP Tax: " , wltp_tax.toString());
-  console.log("WLTP c/desconto: " , wltp_total.toString());
-
-  console.log("CO2 discount: " , co2_cut.toString()); 
-  console.log("CC discount: " , cc_cut.toString()); 
-
   const total_nedc = cc_total + nedc_total;
   const total_wltp = cc_total + wltp_total;
 
-  console.log("Total NEDC: " , total_nedc.toString());
-  console.log("Total WLTP: " , total_wltp.toString());
+  if (DEBUG) {
+    console.log("CC Tax " , cc_tax.toString());
+    console.log("CC c/ desconto " , cc_total.toString());
+    console.log("NEDC Total ", nedc_tax.toString());
+    console.log("NEDC c/ desconto ", nedc_total.toString());
+    console.log("WLTP Tax: " , wltp_tax.toString());
+    console.log("WLTP c/desconto: " , wltp_total.toString());
+    console.log("CO2 discount: " , co2_cut.toString()); 
+    console.log("CC discount: " , cc_cut.toString()); 
+    console.log("Total NEDC: " , total_nedc.toString());
+    console.log("Total WLTP: " , total_wltp.toString());
+  }
 
   if (registrationDateObj.getFullYear() < 2017)
     return {model: "nedc", value: total_nedc.toFixed(2)};
@@ -231,13 +230,12 @@ const price = parseFloat(rawPrice.match(regexPrice).join("").trim().replace(",",
 console.log("Fuel type:" , fuel);
 /* FINAL COST UPDATE*/
 if (["Petrol", "Benzin", "Diesel"].includes(fuel)) {
-  console.log("PRICE" , price.toString());
   const total_tax = calculate_cost(cc, "01/" + registration, emissions, fuel);
   if ("model" in total_tax){
     console.log(total_tax.value.toString());
     const total_cost = Number(total_tax.value) + Number(price.toFixed(2));
     result = "<font color='red'><strong>ISV: </strong>€" + total_tax.value.toString() + " (" + total_tax.model.toString() + ")<br/>";
-    result += "<font color='red'><strong>Total</strong></font>: €" + total_cost.toString() + "potato";
+    result += "<font color='red'><strong>Total</strong></font>: €" + total_cost.toString();
   } else {
     result = "<font color='red'><strong>ISV: </strong>€" + parseFloat(total_tax.nedc) + " (NEDC)<br/>";
     result += "<font color='red'><strong>Total</strong></font>: €" + (parseFloat(total_tax.nedc) + parseFloat(price)).toFixed(2).toString() + " (NEDC)<br/>";
@@ -249,5 +247,3 @@ if (["Petrol", "Benzin", "Diesel"].includes(fuel)) {
   const priceTag = document.getElementById("rbt-pt-v").getElementsByTagName("span")[0];
   priceTag.innerHTML = priceTag.innerHTML + "<br/>" + result;
 }
-
-console.log("DONE PROCESSING" , fuel);
