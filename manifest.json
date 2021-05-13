@@ -1,0 +1,15 @@
+{
+  "manifest_version": 2,
+  "description": "This extension can be used to calculate the ISV (Imposto Sobre Veículos which is a import tax applied to vehicles in Portugal",
+  "name": "ISV Calculator",
+  "icons": { "256": "icon256.png"},
+  "version": "0.1",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://suchen.mobile.de/fahrzeuge/details.html*"
+      ],
+      "js": ["content.js"]
+    }
+  ]
+}
