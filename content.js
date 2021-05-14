@@ -50,6 +50,7 @@ function calculate_co2_tax_diesel(emissions, measurement_type){
 }
 
 function calculate_co2_tax_petrol(emissions, measurement_type){
+  //console.log("CALCULATE MEASUREMENT FOR  ", emissions , " g/km using " , measurement_type , " method");
   if(measurement_type == "NEDC"){
     //console.log("Calculating CO2 tax using NEDC model for Petrol: " + emissions.toString());
     if (emissions <= 99)
@@ -180,7 +181,6 @@ function calculate_motorcycle_import(cc){
 }
 
 if ( document.getElementById("rbt-envkv.emission-l") ){
-console.log("ENTERING CAR MODE");
 const rawEmissions = document.getElementById("rbt-envkv.emission-v").innerText;
 const rawRegistration = document.getElementById("rbt-firstRegistration-v").innerText;
 const rawCC = document.getElementById("rbt-cubicCapacity-v").innerText;
@@ -211,8 +211,8 @@ function calculate_cost(cc, registrationDate, emissions, fuelType){
   
   const registrationDateObj = new Date(registrationDate);
   const cc_tax = calculate_cc_tax(parseInt(cc));
-  const nedc_tax = (fuelType == "Petrol" ? calculate_co2_tax_petrol(parseInt(emissions), "NEDC") : calculate_co2_tax_diesel(parseInt(emissions), "NEDC"));
-  const wltp_tax = (fuelType == "Petrol" ? calculate_co2_tax_petrol(parseInt(emissions), "WLTP"): calculate_co2_tax_diesel(parseInt(emissions), "NEDC"));
+  const nedc_tax = (["Petrol", "Benzin"].includes(fuelType) ? calculate_co2_tax_petrol(parseInt(emissions), "NEDC") : calculate_co2_tax_diesel(parseInt(emissions), "NEDC"));
+  const wltp_tax = (["Petrol", "Benzin"].includes(fuelType) ? calculate_co2_tax_petrol(parseInt(emissions), "WLTP"): calculate_co2_tax_diesel(parseInt(emissions), "NEDC"));
   const co2_cut = co2_tax_cut(registrationDate);
   const cc_cut = cc_tax_cut(registrationDate);
   
@@ -223,6 +223,9 @@ function calculate_cost(cc, registrationDate, emissions, fuelType){
   const total_wltp = cc_total + wltp_total;
 
   if (DEBUG) {
+    console.log("Emissions: " , emissions);
+    console.log("Registration date: " , registrationDate);
+    console.log("Fuel: " , fuelType);
     console.log("CC Tax " , cc_tax.toString());
     console.log("CC c/ desconto " , cc_total.toString());
     console.log("NEDC Total ", nedc_tax.toString());
@@ -247,7 +250,7 @@ const emissions = rawEmissions.match(regexEmissions)[0].trim();
 const registration = rawRegistration.match(regexRegistration)[0].trim();
 const cc = rawCC.match(regexRawCC).join("").split('.').join("").trim();
 const fuel = rawFuel.match(regexFuel).join("").trim();
-const price = parseFloat(rawPrice.match(regexPrice).join("").trim().replace(",", "").replace(".", "").trim());
+const price = parseFloat(rawPrice.match(regexPrice).join("").trim().replaceAll(",", "").replaceAll(".", "").trim());
 
 console.log("Fuel type:" , fuel);
 /* FINAL COST UPDATE*/
@@ -256,13 +259,13 @@ if (["Petrol", "Benzin", "Diesel"].includes(fuel)) {
   if ("model" in total_tax){
     console.log(total_tax.value.toString());
     const total_cost = Number(total_tax.value) + Number(price.toFixed(2));
-    result = "<font color='red'><strong>ISV: </strong>€" + total_tax.value.toString() + " (" + total_tax.model.toString() + ")<br/>";
-    result += "<font color='red'><strong>Total</strong></font>: €" + total_cost.toString();
+    result = "<font color='red'><strong>ISV: </strong>" + Number(total_tax.value).toLocaleString() + " € | " + total_tax.model.toString().toUpperCase() + "<br/>";
+    result += "<font color='red'><strong>Total</strong></font>: " + Number(total_cost).toLocaleString() + " €";
   } else {
-    result = "<font color='red'><strong>ISV: </strong>€" + parseFloat(total_tax.nedc) + " (NEDC)<br/>";
-    result += "<font color='red'><strong>Total</strong></font>: €" + (parseFloat(total_tax.nedc) + parseFloat(price)).toFixed(2).toString() + " (NEDC)<br/>";
-    result += "<font color='red'><strong>ISV: </strong>€" + parseFloat(total_tax.wltp) + " (WLTP)<br/>";
-    result += "<font color='red'><strong>Total</strong></font>: €" + (parseFloat(total_tax.wltp) + parseFloat(price)).toFixed(2).toString() + " (WLTP)";
+    result = "<font color='red'><strong>ISV: </strong>" + Number(total_tax.nedc).toLocaleString() + " € | NEDC<br/>";
+    result += "<font color='red'><strong>Total</strong></font>: " + Number(parseFloat(total_tax.nedc) + parseFloat(price)).toFixed(2).toLocaleString() + " € | NEDC<br/>";
+    result += "<font color='red'><strong>ISV: </strong>" + Number(total_tax.wltp).toLocaleString() + " € | WLTP<br/>";
+    result += "<font color='red'><strong>Total</strong></font>: " + Number(parseFloat(total_tax.wltp) + parseFloat(price)).toFixed(2).toLocaleString() + " € | WLTP";
   }
     
   const total_cost = total_tax + price; 
