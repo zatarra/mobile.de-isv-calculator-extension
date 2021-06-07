@@ -191,7 +191,7 @@ const rawPrice = document.getElementById("rbt-pt-v").innerText;
 const regexEmissions = /[0-9]+/g;
 const regexRegistration = /[0-9]{2}\/[0-9]{4}/g;
 const regexRawCC = /[0-9]+\.?[0-9+]/g;
-const regexFuel = /[a-zA-Z\-]/g
+const regexFuel = /[a-zA-Z\-,]/g
 const regexPrice = /[0-9,.]+/g
 
 /* 
@@ -249,9 +249,10 @@ function calculate_cost(cc, registrationDate, emissions, fuelType){
 const emissions = rawEmissions.match(regexEmissions)[0].trim();
 const registration = rawRegistration.match(regexRegistration)[0].trim();
 const cc = rawCC.match(regexRawCC).join("").split('.').join("").trim();
-const fuel = rawFuel.match(regexFuel).join("").trim();
+const fuel = ["Petrol", "Benzin", "Diesel"].filter( ai => rawFuel.match(regexFuel).join("").trim().split(",").includes(ai))[0] || "Unknown";
 const price = parseFloat(rawPrice.match(regexPrice).join("").trim().replaceAll(",", "").replaceAll(".", "").trim());
 
+console.log(["Petrol", "Benzin", "Diesel"].filter( ai => rawFuel.match(regexFuel).join("").trim().split(",").includes(ai)));
 console.log("Fuel type:" , fuel);
 /* FINAL COST UPDATE*/
 if (["Petrol", "Benzin", "Diesel"].includes(fuel)) {
@@ -259,13 +260,68 @@ if (["Petrol", "Benzin", "Diesel"].includes(fuel)) {
   if ("model" in total_tax){
     console.log(total_tax.value.toString());
     const total_cost = Number(total_tax.value) + Number(price.toFixed(2));
-    result = "<font color='red'><strong>ISV: </strong>" + Number(total_tax.value).toLocaleString() + " € | " + total_tax.model.toString().toUpperCase() + "<br/>";
-    result += "<font color='red'><strong>Total</strong></font>: " + Number(total_cost).toLocaleString() + " €";
+    result = `
+    <div style="
+        background-color: #FF6600;
+        color: white;
+    ">
+        <div style="
+        float: left;
+    ">
+            <img src="https://github.com/zatarra/mobile.de-isv-calculator-extension/raw/main/icon256.png" style="
+        width: 46px;
+    "></div>
+        <div style="
+        padding: 5px;
+        float: left;
+    ">
+            <div><strong>ISV:</strong>`+ Number(total_tax.value).toLocaleString() +`€ | ` + total_tax.model.toString().toUpperCase() + `</div>
+            <div><strong>Total:</strong> ` + Number(total_cost).toLocaleString() + ` €</div>
+        </div>
+            <div style="clear:both"></div>
+    </div></span>`;
   } else {
-    result = "<font color='red'><strong>ISV: </strong>" + Number(total_tax.nedc).toLocaleString() + " € | NEDC<br/>";
-    result += "<font color='red'><strong>Total</strong></font>: " + Number(parseFloat(total_tax.nedc) + parseFloat(price)).toFixed(2).toLocaleString() + " € | NEDC<br/>";
-    result += "<font color='red'><strong>ISV: </strong>" + Number(total_tax.wltp).toLocaleString() + " € | WLTP<br/>";
-    result += "<font color='red'><strong>Total</strong></font>: " + Number(parseFloat(total_tax.wltp) + parseFloat(price)).toFixed(2).toLocaleString() + " € | WLTP";
+    result = `
+    <div style="
+        background-color: #FF6600;
+        color: white;
+    ">
+        <div style="
+        float: left;
+    ">
+            <img src="https://github.com/zatarra/mobile.de-isv-calculator-extension/raw/main/icon256.png" style="
+        width: 46px;
+    "></div>
+        <div style="
+        padding: 5px;
+        float: left;
+    ">
+            <div><strong>ISV:</strong>`+ Number(total_tax.nedc).toLocaleString() +`€ | NEDC</div>
+            <div><strong>Total:</strong> ` + Number(parseFloat(total_tax.nedc) + parseFloat(price)).toFixed(2).toLocaleString() + ` €| NEDC</div>
+        </div>
+            <div style="clear:both"></div>
+    </div></span>`;
+    result += `
+    <div style="
+        background-color: #FF6600;
+        color: white;
+    ">
+        <div style="
+        float: left;
+    ">
+            <img src="https://github.com/zatarra/mobile.de-isv-calculator-extension/raw/main/icon256.png" style="
+        width: 46px;
+    "></div>
+        <div style="
+        padding: 5px;
+        float: left;
+    ">
+            <div><strong>ISV:</strong>`+ Number(total_tax.wltp).toLocaleString() +`€ | WLTP</div>
+            <div><strong>Total:</strong> ` + Number(parseFloat(total_tax.wltp) + parseFloat(price)).toFixed(2).toLocaleString() + ` €| WLTP</div>
+        </div>
+            <div style="clear:both"></div>
+    </div></span>`;
+
   }
     
   const total_cost = total_tax + price; 
@@ -283,5 +339,24 @@ if (["Petrol", "Benzin", "Diesel"].includes(fuel)) {
 
     const motorcycle_cost = calculate_motorcycle_import(cc);
     const priceTag = document.getElementById("rbt-pt-v").getElementsByTagName("span")[0];
-    priceTag.innerHTML = priceTag.innerHTML + "<br/><font color='red'><strong>ISV: </strong>€" + Number(motorcycle_cost) + "<br/><strong>Total: </strong>€" + (Number(price) + Number(motorcycle_cost)).toString() + "</font>";
+    priceTag.innerHTML = priceTag.innerHTML + 
+   `<br/><div style="
+    background-color: #FF6600;
+    color: white;
+">
+    <div style="
+    float: left;
+">
+        <img src="https://github.com/zatarra/mobile.de-isv-calculator-extension/raw/main/icon256.png" style="
+    width: 46px;
+"></div>
+    <div style="
+    padding: 5px;
+    float: left;
+">
+        <div><strong>ISV:</strong>` + Number(motorcycle_cost) + `€</div>
+        <div><strong>Total:</strong>` + (Number(price) + Number(motorcycle_cost)).toString() + `€</div>
+    </div>
+        <div style="clear:both"></div>
+</div></span>`;
 }
